@@ -1,0 +1,14 @@
+medallion_dw:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DW_PATH', '../data/warehouse/medallion.duckdb') }}"
+      threads: 4
+      extensions:
+        - httpfs
+        - parquet
+    prod:
+      type: duckdb
+      path: "{{ env_var('DW_PATH_PROD', '../data/warehouse/medallion_prod.duckdb') }}"
+      threads: 8

@@ -1,0 +1,154 @@
+version: 2
+
+# ════════════════════════════════════════════
+# CAMADA SILVER
+# ════════════════════════════════════════════
+models:
+  - name: slv_estados
+    description: >
+      Estados brasileiros limpos e enriquecidos com classificação IDH,
+      quartil de PIB e ranking intra-regional. Série 2019–2023.
+    columns:
+      - name: sigla_uf
+        tests: [not_null]
+      - name: ano
+        tests: [not_null]
+      - name: populacao
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 100000
+              max_value: 50000000
+      - name: pib_per_capita
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 5000
+              max_value: 200000
+      - name: idh
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+      - name: nivel_idh
+        tests:
+          - accepted_values:
+              values: ["Muito Alto", "Alto", "Médio", "Baixo"]
+      - name: quartil_pib
+        tests:
+          - accepted_values:
+              values: [1, 2, 3, 4]
+
+  - name: slv_municipios
+    description: >
+      Municípios com porte demográfico, densidade e indicadores do estado pai.
+    columns:
+      - name: nome_municipio
+        tests: [not_null]
+      - name: sigla_uf
+        tests: [not_null]
+      - name: populacao
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1000
+      - name: porte_municipio
+        tests:
+          - accepted_values:
+              values: ["Metrópole", "Grande", "Médio", "Pequeno", "Micro"]
+
+  - name: slv_internacoes
+    description: >
+      Internações hospitalares limpas, enriquecidas com dados socioeconômicos da UF.
+    columns:
+      - name: id_aih
+        tests: [not_null, unique]
+      - name: sigla_uf
+        tests: [not_null]
+      - name: cid_principal
+        tests: [not_null]
+      - name: dias_internacao
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1
+              max_value: 365
+      - name: valor_aih
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1
+      - name: obito
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+      - name: custo_por_dia
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1
+
+# ════════════════════════════════════════════
+# CAMADA GOLD
+# ════════════════════════════════════════════
+  - name: gld_saude_por_uf
+    description: >
+      Visão analítica principal: indicadores de saúde e socioeconômicos
+      por UF e ano. Inclui rankings nacionais e score de performance.
+    columns:
+      - name: sigla_uf
+        tests: [not_null]
+      - name: ano
+        tests: [not_null]
+      - name: taxa_obito_pct
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 100
+      - name: score_performance
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+      - name: pct_urgencia
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 100
+
+  - name: gld_diagnosticos_resumo
+    description: >
+      Ranking de CIDs por volume, custo e mortalidade por ano.
+    columns:
+      - name: cid_principal
+        tests: [not_null]
+      - name: ano
+        tests: [not_null]
+      - name: taxa_obito_pct
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 100
+      - name: rank_volume
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1
+
+  - name: gld_evolucao_temporal
+    description: >
+      Série temporal mensal com médias móveis e variação MoM por região.
+    columns:
+      - name: mes
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1
+              max_value: 12
+      - name: trimestre
+        tests:
+          - accepted_values:
+              values: ["Q1", "Q2", "Q3", "Q4"]

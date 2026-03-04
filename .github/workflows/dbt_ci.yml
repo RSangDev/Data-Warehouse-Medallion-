@@ -1,0 +1,136 @@
+name: dbt CI — Medallion DW
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "dbt_project/**"
+      - "ingestion/**"
+      - ".github/workflows/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "dbt_project/**"
+      - "ingestion/**"
+
+env:
+  DBT_DIR: ./dbt_project
+  DW_PATH: ./data/warehouse/medallion.duckdb
+
+jobs:
+  # ─── Job 1: Lint e validação do projeto dbt ──────────────────
+  dbt-lint:
+    name: dbt parse & compile
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install dbt-duckdb==1.8.1 duckdb==0.10.3 pandas numpy
+
+      - name: dbt parse (valida sintaxe dos modelos)
+        working-directory: ${{ env.DBT_DIR }}
+        run: dbt parse --profiles-dir . --project-dir .
+
+      - name: dbt compile (valida SQL sem executar)
+        working-directory: ${{ env.DBT_DIR }}
+        run: dbt compile --profiles-dir . --project-dir .
+
+  # ─── Job 2: Pipeline completo + testes ───────────────────────
+  dbt-full-pipeline:
+    name: Full pipeline + dbt test
+    runs-on: ubuntu-latest
+    needs: dbt-lint
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install all dependencies
+        run: pip install dbt-duckdb==1.8.1 duckdb==0.10.3 pandas numpy requests
+
+      - name: Create data directories
+        run: mkdir -p data/raw data/warehouse
+
+      - name: Run ingestion
+        run: python ingestion/ingest.py
+
+      - name: Load bronze layer
+        run: python ingestion/load_to_duckdb.py
+
+      - name: dbt run (all models)
+        working-directory: ${{ env.DBT_DIR }}
+        env:
+          DW_PATH: "../data/warehouse/medallion.duckdb"
+        run: dbt run --profiles-dir . --project-dir . --full-refresh
+
+      - name: dbt test (data quality)
+        working-directory: ${{ env.DBT_DIR }}
+        env:
+          DW_PATH: "../data/warehouse/medallion.duckdb"
+        run: dbt test --profiles-dir . --project-dir .
+
+      - name: dbt docs generate
+        working-directory: ${{ env.DBT_DIR }}
+        env:
+          DW_PATH: "../data/warehouse/medallion.duckdb"
+        run: dbt docs generate --profiles-dir . --project-dir .
+
+      - name: Upload dbt artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dbt-artifacts
+          path: |
+            dbt_project/target/manifest.json
+            dbt_project/target/run_results.json
+            dbt_project/target/catalog.json
+          retention-days: 30
+
+      - name: Upload DuckDB for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: duckdb-warehouse
+          path: data/warehouse/medallion.duckdb
+          retention-days: 7
+
+  # ─── Job 3: Deploy docs para GitHub Pages ────────────────────
+  deploy-docs:
+    name: Deploy dbt docs
+    runs-on: ubuntu-latest
+    needs: dbt-full-pipeline
+    if: github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download dbt artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dbt-artifacts
+          path: dbt_project/target/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dbt_project/target
+          destination_dir: docs

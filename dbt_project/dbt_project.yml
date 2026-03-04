@@ -1,0 +1,37 @@
+name: 'medallion_dw'
+version: '1.0.0'
+config-version: 2
+
+profile: 'medallion_dw'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  medallion_dw:
+    bronze:
+      +materialized: view
+      +schema: bronze
+      +tags: ["bronze", "raw"]
+    silver:
+      +materialized: table
+      +schema: silver
+      +tags: ["silver", "cleaned"]
+    gold:
+      +materialized: table
+      +schema: gold
+      +tags: ["gold", "aggregated"]
+
+vars:
+  start_year: 2019
+  end_year: 2023
+  project_name: "DW Medallion — IBGE + DATASUS"

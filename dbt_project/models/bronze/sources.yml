@@ -1,0 +1,89 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: >
+      Camada Bronze — dados brutos ingeridos diretamente do IBGE e DATASUS.
+      Nenhuma transformação aplicada além do carregamento. Serve como fonte
+      de verdade imutável para as transformações silver/gold.
+    schema: bronze
+    tags: ["bronze", "raw"]
+
+    tables:
+      - name: ibge_estados
+        description: >
+          Dados socioeconômicos anuais por UF (IBGE/SIDRA).
+          Inclui população estimada, PIB per capita e IDH para 2019–2023.
+        columns:
+          - name: sigla_uf
+            description: Sigla da Unidade Federativa (2 letras)
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ["AM","PA","AC","RO","RR","AP","TO","MA","PI","CE","RN",
+                           "PB","PE","AL","SE","BA","MG","ES","RJ","SP","PR","SC",
+                           "RS","MT","MS","GO","DF"]
+          - name: ano
+            description: Ano de referência do dado
+            tests:
+              - not_null
+          - name: populacao
+            description: População estimada pelo IBGE
+            tests:
+              - not_null
+          - name: pib_per_capita
+            description: PIB per capita em R$
+            tests:
+              - not_null
+          - name: idh
+            description: Índice de Desenvolvimento Humano (0-1)
+            tests:
+              - not_null
+
+      - name: ibge_municipios
+        description: >
+          Dados socioeconômicos anuais por município (IBGE/SIDRA).
+          Amostra dos principais municípios por UF, 2019–2023.
+        columns:
+          - name: nome_municipio
+            tests: [not_null]
+          - name: sigla_uf
+            tests: [not_null]
+          - name: populacao
+            tests: [not_null]
+          - name: ano
+            tests: [not_null]
+
+      - name: datasus_internacoes
+        description: >
+          Registros de internações hospitalares do SIH/DATASUS.
+          Inclui CID principal, perfil do paciente, tempo e custo de internação.
+        columns:
+          - name: id_aih
+            description: Identificador único da Autorização de Internação Hospitalar
+            tests:
+              - not_null
+              - unique
+          - name: sigla_uf
+            tests: [not_null]
+          - name: cid_principal
+            description: Código CID-10 do diagnóstico principal
+            tests: [not_null]
+          - name: dias_internacao
+            description: Quantidade de dias internado
+            tests:
+              - not_null
+          - name: valor_aih
+            description: Valor pago pelo SUS pela internação (R$)
+            tests:
+              - not_null
+          - name: obito
+            description: Flag de óbito hospitalar (0=alta, 1=óbito)
+            tests:
+              - not_null
+              - accepted_values:
+                  values: [0, 1]
+          - name: sexo
+            tests:
+              - accepted_values:
+                  values: ["M", "F"]
