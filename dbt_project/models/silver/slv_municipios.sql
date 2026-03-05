@@ -30,9 +30,9 @@ enriquecido AS (
 
         -- Porte demográfico
         CASE
-            WHEN m.populacao >= 1000000  THEN 'Metrópole'
+            WHEN m.populacao >= 1000000  THEN 'Metropole'
             WHEN m.populacao >= 500000   THEN 'Grande'
-            WHEN m.populacao >= 100000   THEN 'Médio'
+            WHEN m.populacao >= 100000   THEN 'Medio'
             WHEN m.populacao >= 20000    THEN 'Pequeno'
             ELSE 'Micro'
         END AS porte_municipio,

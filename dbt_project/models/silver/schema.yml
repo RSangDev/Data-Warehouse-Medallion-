@@ -13,19 +13,19 @@ models:
       - name: populacao
         data_tests:
           - not_null
-          - accepted_range:
+          - dbt_utils.accepted_range:
               min_value: 100000
               max_value: 50000000
       - name: pib_per_capita
         data_tests:
           - not_null
-          - accepted_range:
+          - dbt_utils.accepted_range:
               min_value: 5000
               max_value: 200000
       - name: idh
         data_tests:
           - not_null
-          - accepted_range:
+          - dbt_utils.accepted_range:
               min_value: 0
               max_value: 1
       - name: nivel_idh
@@ -48,7 +48,7 @@ models:
       - name: populacao
         data_tests:
           - not_null
-          - accepted_range:
+          - dbt_utils.accepted_range:
               min_value: 1000
       - name: porte_municipio
         data_tests:
@@ -68,13 +68,13 @@ models:
       - name: dias_internacao
         data_tests:
           - not_null
-          - accepted_range:
+          - dbt_utils.accepted_range:
               min_value: 1
               max_value: 365
       - name: valor_aih
         data_tests:
           - not_null
-          - accepted_range:
+          - dbt_utils.accepted_range:
               min_value: 1
       - name: obito
         data_tests:
@@ -84,5 +84,5 @@ models:
       - name: custo_por_dia
         data_tests:
           - not_null
-          - accepted_range:
+          - dbt_utils.accepted_range:
               min_value: 1

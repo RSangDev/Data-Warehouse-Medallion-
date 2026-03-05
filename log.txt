@@ -1,0 +1,237 @@
+python run.py
+2026-03-04 18:02:46,569 [INFO] ====================================================
+2026-03-04 18:02:46,569 [INFO] STEP 1/3 -- Ingestao de dados
+2026-03-04 18:02:46,569 [INFO] ====================================================
+2026-03-04 18:02:47,109 [INFO] Ingerindo dados IBGE — estados...
+2026-03-04 18:02:47,111 [INFO]   → 135 registros de estados
+2026-03-04 18:02:47,111 [INFO] Ingerindo dados IBGE — municípios...
+2026-03-04 18:02:47,116 [INFO]   → 320 registros de municípios
+2026-03-04 18:02:47,117 [INFO] Ingerindo DATASUS — 3000 internações...
+2026-03-04 18:02:47,431 [INFO]   → 3000 internações
+2026-03-04 18:02:47,453 [INFO] Arquivos salvos em data/raw/
+2026-03-04 18:02:47,454 [INFO] ====================================================
+2026-03-04 18:02:47,454 [INFO] STEP 2/3 -- Carregando Bronze layer
+2026-03-04 18:02:47,454 [INFO] ====================================================
+2026-03-04 18:02:47,762 [INFO]   bronze.ibge_estados: 135 linhas carregadas
+2026-03-04 18:02:47,877 [INFO]   bronze.ibge_municipios: 320 linhas carregadas
+2026-03-04 18:02:48,027 [INFO]   bronze.datasus_internacoes: 3,000 linhas carregadas
+2026-03-04 18:02:48,162 [INFO] Bronze schema populado em: D:\Projetos\Data-Warehouse-Medallion\data\warehouse\medallion.duckdb
+2026-03-04 18:02:48,162 [INFO] ====================================================
+2026-03-04 18:02:48,162 [INFO] STEP 3/3 -- dbt run + dbt test
+2026-03-04 18:02:48,162 [INFO] ====================================================
+2026-03-04 18:02:48,162 [INFO] Executando: D:\Projetos\Data-Warehouse-Medallion\.venv\Scripts\dbt.exe run --profiles-dir . --project-dir .
+21:02:51  Running with dbt=1.8.7
+21:02:51  Registered adapter: duckdb=1.8.1
+21:02:52  Found 9 models, 61 data tests, 3 sources, 428 macros
+21:02:52  
+21:02:53  Concurrency: 4 threads (target='dev')
+21:02:53  
+21:02:53  1 of 9 START sql view model main_bronze.brz_datasus_internacoes ................ [RUN]
+21:02:53  2 of 9 START sql view model main_bronze.brz_ibge_estados ....................... [RUN]
+21:02:53  3 of 9 START sql view model main_bronze.brz_ibge_municipios .................... [RUN]
+21:02:53  2 of 9 OK created sql view model main_bronze.brz_ibge_estados .................. [OK in 0.41s]
+21:02:53  4 of 9 START sql table model main_silver.slv_estados ........................... [RUN]
+21:02:54  1 of 9 OK created sql view model main_bronze.brz_datasus_internacoes ........... [OK in 0.44s]
+21:02:54  3 of 9 OK created sql view model main_bronze.brz_ibge_municipios ............... [OK in 0.46s]
+21:02:54  4 of 9 OK created sql table model main_silver.slv_estados ...................... [OK in 0.29s]
+21:02:54  5 of 9 START sql table model main_silver.slv_internacoes ....................... [RUN]
+21:02:54  6 of 9 START sql table model main_silver.slv_municipios ........................ [RUN]
+21:02:54  6 of 9 OK created sql table model main_silver.slv_municipios ................... [OK in 0.30s]
+21:02:54  5 of 9 OK created sql table model main_silver.slv_internacoes .................. [OK in 0.54s]
+21:02:54  7 of 9 START sql table model main_gold.gld_diagnosticos_resumo ................. [RUN]
+21:02:54  8 of 9 START sql table model main_gold.gld_evolucao_temporal ................... [RUN]
+21:02:54  9 of 9 START sql table model main_gold.gld_saude_por_uf ........................ [RUN]
+21:02:55  8 of 9 OK created sql table model main_gold.gld_evolucao_temporal .............. [OK in 0.36s]
+21:02:55  7 of 9 OK created sql table model main_gold.gld_diagnosticos_resumo ............ [OK in 0.38s]
+21:02:55  9 of 9 OK created sql table model main_gold.gld_saude_por_uf ................... [OK in 0.54s]
+21:02:55  
+21:02:55  Finished running 3 view models, 6 table models in 0 hours 0 minutes and 2.73 seconds (2.73s).
+21:02:55  
+21:02:55  Completed successfully
+21:02:55
+21:02:55  Done. PASS=9 WARN=0 ERROR=0 SKIP=0 TOTAL=9
+2026-03-04 18:02:57,053 [INFO] Executando: D:\Projetos\Data-Warehouse-Medallion\.venv\Scripts\dbt.exe test --profiles-dir . --project-dir .
+21:02:59  Running with dbt=1.8.7
+21:03:00  Registered adapter: duckdb=1.8.1
+21:03:00  Found 9 models, 61 data tests, 3 sources, 428 macros
+21:03:00  
+21:03:01  Concurrency: 4 threads (target='dev')
+21:03:01  
+21:03:01  1 of 61 START test accepted_range_gld_diagnosticos_resumo_rank_volume__1 ....... [RUN]
+21:03:01  2 of 61 START test accepted_range_gld_diagnosticos_resumo_taxa_obito_pct__100__0  [RUN]
+21:03:01  3 of 61 START test accepted_range_gld_evolucao_temporal_mes__12__1 ............. [RUN]
+21:03:01  4 of 61 START test accepted_range_gld_saude_por_uf_pct_urgencia__100__0 ........ [RUN]
+21:03:01  1 of 61 ERROR accepted_range_gld_diagnosticos_resumo_rank_volume__1 ............ [ERROR in 0.04s]
+21:03:01  2 of 61 ERROR accepted_range_gld_diagnosticos_resumo_taxa_obito_pct__100__0 .... [ERROR in 0.04s]
+21:03:01  4 of 61 ERROR accepted_range_gld_saude_por_uf_pct_urgencia__100__0 ............. [ERROR in 0.04s]
+21:03:01  3 of 61 ERROR accepted_range_gld_evolucao_temporal_mes__12__1 .................. [ERROR in 0.05s]
+21:03:01  5 of 61 START test accepted_range_gld_saude_por_uf_score_performance__0 ........ [RUN]
+21:03:01  6 of 61 START test accepted_range_gld_saude_por_uf_taxa_obito_pct__100__0 ...... [RUN]
+21:03:01  7 of 61 START test accepted_range_slv_estados_idh__1__0 ........................ [RUN]
+21:03:01  8 of 61 START test accepted_range_slv_estados_pib_per_capita__200000__5000 ..... [RUN]
+21:03:01  5 of 61 ERROR accepted_range_gld_saude_por_uf_score_performance__0 ............. [ERROR in 0.03s]
+21:03:01  6 of 61 ERROR accepted_range_gld_saude_por_uf_taxa_obito_pct__100__0 ........... [ERROR in 0.03s]
+21:03:01  8 of 61 ERROR accepted_range_slv_estados_pib_per_capita__200000__5000 .......... [ERROR in 0.03s]
+21:03:01  7 of 61 ERROR accepted_range_slv_estados_idh__1__0 ............................. [ERROR in 0.03s]
+21:03:01  9 of 61 START test accepted_range_slv_estados_populacao__50000000__100000 ...... [RUN]
+21:03:01  10 of 61 START test accepted_range_slv_internacoes_custo_por_dia__1 ............ [RUN]
+21:03:01  11 of 61 START test accepted_range_slv_internacoes_dias_internacao__365__1 ..... [RUN]
+21:03:01  12 of 61 START test accepted_range_slv_internacoes_valor_aih__1 ................ [RUN]
+21:03:01  9 of 61 ERROR accepted_range_slv_estados_populacao__50000000__100000 ........... [ERROR in 0.03s]
+21:03:01  10 of 61 ERROR accepted_range_slv_internacoes_custo_por_dia__1 ................. [ERROR in 0.03s]
+21:03:01  11 of 61 ERROR accepted_range_slv_internacoes_dias_internacao__365__1 .......... [ERROR in 0.03s]
+21:03:01  12 of 61 ERROR accepted_range_slv_internacoes_valor_aih__1 ..................... [ERROR in 0.03s]
+21:03:01  13 of 61 START test accepted_range_slv_municipios_populacao__1000 .............. [RUN]
+21:03:01  14 of 61 START test accepted_values_gld_evolucao_temporal_trimestre__Q1__Q2__Q3__Q4  [RUN]
+21:03:01  15 of 61 START test accepted_values_slv_estados_nivel_idh__Muito_Alto__Alto__Medio__Baixo  [RUN]
+21:03:01  16 of 61 START test accepted_values_slv_estados_quartil_pib__1__2__3__4 ........ [RUN]
+21:03:01  13 of 61 ERROR accepted_range_slv_municipios_populacao__1000 ................... [ERROR in 0.02s]
+21:03:01  17 of 61 START test accepted_values_slv_internacoes_obito__0__1 ................ [RUN]
+21:03:01  14 of 61 PASS accepted_values_gld_evolucao_temporal_trimestre__Q1__Q2__Q3__Q4 .. [PASS in 0.20s]
+21:03:01  16 of 61 PASS accepted_values_slv_estados_quartil_pib__1__2__3__4 .............. [PASS in 0.19s]
+21:03:01  17 of 61 PASS accepted_values_slv_internacoes_obito__0__1 ...................... [PASS in 0.13s]
+21:03:01  15 of 61 FAIL 1 accepted_values_slv_estados_nivel_idh__Muito_Alto__Alto__Medio__Baixo  [FAIL 1 in 0.20s]    
+21:03:01  18 of 61 START test accepted_values_slv_municipios_porte_municipio__Metropole__Grande__Medio__Pequeno__Micro  [RUN]
+21:03:01  19 of 61 START test not_null_gld_diagnosticos_resumo_ano ....................... [RUN]
+21:03:01  20 of 61 START test not_null_gld_diagnosticos_resumo_cid_principal ............. [RUN]
+21:03:01  21 of 61 START test not_null_gld_diagnosticos_resumo_rank_volume ............... [RUN]
+21:03:01  20 of 61 PASS not_null_gld_diagnosticos_resumo_cid_principal ................... [PASS in 0.17s]
+21:03:01  19 of 61 PASS not_null_gld_diagnosticos_resumo_ano ............................. [PASS in 0.17s]
+21:03:01  21 of 61 PASS not_null_gld_diagnosticos_resumo_rank_volume ..................... [PASS in 0.17s]
+21:03:01  18 of 61 FAIL 2 accepted_values_slv_municipios_porte_municipio__Metropole__Grande__Medio__Pequeno__Micro  [FAIL 2 in 0.17s]
+21:03:01  22 of 61 START test not_null_gld_evolucao_temporal_mes ......................... [RUN]
+21:03:01  23 of 61 START test not_null_gld_saude_por_uf_ano .............................. [RUN]
+21:03:01  24 of 61 START test not_null_gld_saude_por_uf_score_performance ................ [RUN]
+21:03:01  25 of 61 START test not_null_gld_saude_por_uf_sigla_uf ......................... [RUN]
+21:03:02  22 of 61 PASS not_null_gld_evolucao_temporal_mes ............................... [PASS in 0.16s]
+21:03:02  24 of 61 PASS not_null_gld_saude_por_uf_score_performance ...................... [PASS in 0.16s]
+21:03:02  23 of 61 PASS not_null_gld_saude_por_uf_ano .................................... [PASS in 0.16s]
+21:03:02  25 of 61 PASS not_null_gld_saude_por_uf_sigla_uf ............................... [PASS in 0.16s]
+21:03:02  26 of 61 START test not_null_gld_saude_por_uf_taxa_obito_pct ................... [RUN]
+21:03:02  27 of 61 START test not_null_slv_estados_ano ................................... [RUN]
+21:03:02  28 of 61 START test not_null_slv_estados_idh ................................... [RUN]
+21:03:02  29 of 61 START test not_null_slv_estados_pib_per_capita ........................ [RUN]
+21:03:02  27 of 61 PASS not_null_slv_estados_ano ......................................... [PASS in 0.17s]
+21:03:02  26 of 61 PASS not_null_gld_saude_por_uf_taxa_obito_pct ......................... [PASS in 0.17s]
+21:03:02  28 of 61 PASS not_null_slv_estados_idh ......................................... [PASS in 0.17s]
+21:03:02  29 of 61 PASS not_null_slv_estados_pib_per_capita .............................. [PASS in 0.16s]
+21:03:02  30 of 61 START test not_null_slv_estados_populacao ............................. [RUN]
+21:03:02  31 of 61 START test not_null_slv_estados_sigla_uf .............................. [RUN]
+21:03:02  32 of 61 START test not_null_slv_internacoes_cid_principal ..................... [RUN]
+21:03:02  33 of 61 START test not_null_slv_internacoes_custo_por_dia ..................... [RUN]
+21:03:02  30 of 61 PASS not_null_slv_estados_populacao ................................... [PASS in 0.19s]
+21:03:02  31 of 61 PASS not_null_slv_estados_sigla_uf .................................... [PASS in 0.19s]
+21:03:02  33 of 61 PASS not_null_slv_internacoes_custo_por_dia ........................... [PASS in 0.18s]
+21:03:02  34 of 61 START test not_null_slv_internacoes_dias_internacao ................... [RUN]
+21:03:02  32 of 61 PASS not_null_slv_internacoes_cid_principal ........................... [PASS in 0.20s]
+21:03:02  35 of 61 START test not_null_slv_internacoes_id_aih ............................ [RUN]
+21:03:02  36 of 61 START test not_null_slv_internacoes_obito ............................. [RUN]
+21:03:02  37 of 61 START test not_null_slv_internacoes_sigla_uf .......................... [RUN]
+21:03:02  35 of 61 PASS not_null_slv_internacoes_id_aih .................................. [PASS in 0.30s]
+21:03:02  36 of 61 PASS not_null_slv_internacoes_obito ................................... [PASS in 0.30s]
+21:03:02  34 of 61 PASS not_null_slv_internacoes_dias_internacao ......................... [PASS in 0.32s]
+21:03:02  37 of 61 PASS not_null_slv_internacoes_sigla_uf ................................ [PASS in 0.31s]
+21:03:02  38 of 61 START test not_null_slv_internacoes_valor_aih ......................... [RUN]
+21:03:02  39 of 61 START test not_null_slv_municipios_nome_municipio ..................... [RUN]
+21:03:02  40 of 61 START test not_null_slv_municipios_populacao .......................... [RUN]
+21:03:02  41 of 61 START test not_null_slv_municipios_sigla_uf ........................... [RUN]
+21:03:02  41 of 61 PASS not_null_slv_municipios_sigla_uf ................................. [PASS in 0.20s]
+21:03:02  38 of 61 PASS not_null_slv_internacoes_valor_aih ............................... [PASS in 0.21s]
+21:03:02  39 of 61 PASS not_null_slv_municipios_nome_municipio ........................... [PASS in 0.21s]
+21:03:02  40 of 61 PASS not_null_slv_municipios_populacao ................................ [PASS in 0.21s]
+21:03:02  42 of 61 START test source_accepted_values_bronze_datasus_internacoes_obito__0__1  [RUN]
+21:03:02  43 of 61 START test source_accepted_values_bronze_datasus_internacoes_sexo__M__F  [RUN]
+21:03:02  44 of 61 START test source_accepted_values_bronze_ibge_estados_sigla_uf__AM__PA__AC__RO__RR__AP__TO__MA__PI__CE__RN__PB__PE__AL__SE__BA__MG__ES__RJ__SP__PR__SC__RS__MT__MS__GO__DF  [RUN]
+21:03:02  45 of 61 START test source_not_null_bronze_datasus_internacoes_cid_principal ... [RUN]
+21:03:03  42 of 61 PASS source_accepted_values_bronze_datasus_internacoes_obito__0__1 .... [PASS in 0.22s]
+21:03:03  43 of 61 PASS source_accepted_values_bronze_datasus_internacoes_sexo__M__F ..... [PASS in 0.22s]
+21:03:03  45 of 61 PASS source_not_null_bronze_datasus_internacoes_cid_principal ......... [PASS in 0.22s]
+21:03:03  44 of 61 PASS source_accepted_values_bronze_ibge_estados_sigla_uf__AM__PA__AC__RO__RR__AP__TO__MA__PI__CE__RN__PB__PE__AL__SE__BA__MG__ES__RJ__SP__PR__SC__RS__MT__MS__GO__DF  [PASS in 0.23s]
+21:03:03  46 of 61 START test source_not_null_bronze_datasus_internacoes_dias_internacao . [RUN]
+21:03:03  47 of 61 START test source_not_null_bronze_datasus_internacoes_id_aih .......... [RUN]
+21:03:03  48 of 61 START test source_not_null_bronze_datasus_internacoes_obito ........... [RUN]
+21:03:03  49 of 61 START test source_not_null_bronze_datasus_internacoes_sigla_uf ........ [RUN]
+21:03:03  46 of 61 PASS source_not_null_bronze_datasus_internacoes_dias_internacao ....... [PASS in 0.18s]
+21:03:03  47 of 61 PASS source_not_null_bronze_datasus_internacoes_id_aih ................ [PASS in 0.18s]
+21:03:03  49 of 61 PASS source_not_null_bronze_datasus_internacoes_sigla_uf .............. [PASS in 0.18s]
+21:03:03  48 of 61 PASS source_not_null_bronze_datasus_internacoes_obito ................. [PASS in 0.18s]
+21:03:03  50 of 61 START test source_not_null_bronze_datasus_internacoes_valor_aih ....... [RUN]
+21:03:03  51 of 61 START test source_not_null_bronze_ibge_estados_ano .................... [RUN]
+21:03:03  52 of 61 START test source_not_null_bronze_ibge_estados_idh .................... [RUN]
+21:03:03  53 of 61 START test source_not_null_bronze_ibge_estados_pib_per_capita ......... [RUN]
+21:03:03  51 of 61 PASS source_not_null_bronze_ibge_estados_ano .......................... [PASS in 0.21s]
+21:03:03  50 of 61 PASS source_not_null_bronze_datasus_internacoes_valor_aih ............. [PASS in 0.22s]
+21:03:03  52 of 61 PASS source_not_null_bronze_ibge_estados_idh .......................... [PASS in 0.22s]
+21:03:03  53 of 61 PASS source_not_null_bronze_ibge_estados_pib_per_capita ............... [PASS in 0.22s]
+21:03:03  54 of 61 START test source_not_null_bronze_ibge_estados_populacao .............. [RUN]
+21:03:03  55 of 61 START test source_not_null_bronze_ibge_estados_sigla_uf ............... [RUN]
+21:03:03  56 of 61 START test source_not_null_bronze_ibge_municipios_ano ................. [RUN]
+21:03:03  57 of 61 START test source_not_null_bronze_ibge_municipios_nome_municipio ...... [RUN]
+21:03:03  55 of 61 PASS source_not_null_bronze_ibge_estados_sigla_uf ..................... [PASS in 0.21s]
+21:03:03  56 of 61 PASS source_not_null_bronze_ibge_municipios_ano ....................... [PASS in 0.21s]
+21:03:03  54 of 61 PASS source_not_null_bronze_ibge_estados_populacao .................... [PASS in 0.22s]
+21:03:03  57 of 61 PASS source_not_null_bronze_ibge_municipios_nome_municipio ............ [PASS in 0.20s]
+21:03:03  58 of 61 START test source_not_null_bronze_ibge_municipios_populacao ........... [RUN]
+21:03:03  59 of 61 START test source_not_null_bronze_ibge_municipios_sigla_uf ............ [RUN]
+21:03:03  60 of 61 START test source_unique_bronze_datasus_internacoes_id_aih ............ [RUN]
+21:03:03  61 of 61 START test unique_slv_internacoes_id_aih .............................. [RUN]
+21:03:04  59 of 61 PASS source_not_null_bronze_ibge_municipios_sigla_uf .................. [PASS in 0.16s]
+21:03:04  58 of 61 PASS source_not_null_bronze_ibge_municipios_populacao ................. [PASS in 0.16s]
+21:03:04  60 of 61 PASS source_unique_bronze_datasus_internacoes_id_aih .................. [PASS in 0.16s]
+21:03:04  61 of 61 PASS unique_slv_internacoes_id_aih .................................... [PASS in 0.16s]
+21:03:04  
+21:03:04  Finished running 61 data tests in 0 hours 0 minutes and 3.21 seconds (3.21s).
+21:03:04  
+21:03:04  Completed with 15 errors and 0 warnings:
+21:03:04
+21:03:04    Compilation Error in test accepted_range_gld_diagnosticos_resumo_rank_volume__1 (models\gold\schema.yml)  
+  'test_accepted_range' is undefined. This can happen when calling a macro that does not exist. Check for typos and/or install package dependencies with "dbt deps".
+21:03:04
+21:03:04    Compilation Error in test accepted_range_gld_diagnosticos_resumo_taxa_obito_pct__100__0 (models\gold\schema.yml)
+  'test_accepted_range' is undefined. This can happen when calling a macro that does not exist. Check for typos and/or install package dependencies with "dbt deps".
+21:03:04
+21:03:04    Compilation Error in test accepted_range_gld_saude_por_uf_pct_urgencia__100__0 (models\gold\schema.yml)   
+  'test_accepted_range' is undefined. This can happen when calling a macro that does not exist. Check for typos and/or install package dependencies with "dbt deps".
+21:03:04
+21:03:04    Compilation Error in test accepted_range_gld_evolucao_temporal_mes__12__1 (models\gold\schema.yml)        
+  'test_accepted_range' is undefined. This can happen when calling a macro that does not exist. Check for typos and/or install package dependencies with "dbt deps".
+21:03:04
+21:03:04    Compilation Error in test accepted_range_gld_saude_por_uf_score_performance__0 (models\gold\schema.yml)   
+  'test_accepted_range' is undefined. This can happen when calling a macro that does not exist. Check for typos and/or install package dependencies with "dbt deps".
+21:03:04
+21:03:04    Compilation Error in test accepted_range_gld_saude_por_uf_taxa_obito_pct__100__0 (models\gold\schema.yml) 
+  'test_accepted_range' is undefined. This can happen when calling a macro that does not exist. Check for typos and/or install package dependencies with "dbt deps".
+21:03:04
+21:03:04    Compilation Error in test accepted_range_slv_estados_pib_per_capita__200000__5000 (models\silver\schema.yml)
+  'test_accepted_range' is undefined. This can happen when calling a macro that does not exist. Check for typos and/or install package dependencies with "dbt deps".
+21:03:04
+21:03:04    Compilation Error in test accepted_range_slv_estados_idh__1__0 (models\silver\schema.yml)
+  'test_accepted_range' is undefined. This can happen when calling a macro that does not exist. Check for typos and/or install package dependencies with "dbt deps".
+21:03:04
+21:03:04    Compilation Error in test accepted_range_slv_estados_populacao__50000000__100000 (models\silver\schema.yml)
+  'test_accepted_range' is undefined. This can happen when calling a macro that does not exist. Check for typos and/or install package dependencies with "dbt deps".
+21:03:04
+21:03:04    Compilation Error in test accepted_range_slv_internacoes_custo_por_dia__1 (models\silver\schema.yml)      
+  'test_accepted_range' is undefined. This can happen when calling a macro that does not exist. Check for typos and/or install package dependencies with "dbt deps".
+21:03:04
+21:03:04    Compilation Error in test accepted_range_slv_internacoes_dias_internacao__365__1 (models\silver\schema.yml)
+  'test_accepted_range' is undefined. This can happen when calling a macro that does not exist. Check for typos and/or install package dependencies with "dbt deps".
+21:03:04
+21:03:04    Compilation Error in test accepted_range_slv_internacoes_valor_aih__1 (models\silver\schema.yml)
+  'test_accepted_range' is undefined. This can happen when calling a macro that does not exist. Check for typos and/or install package dependencies with "dbt deps".
+21:03:04
+21:03:04    Compilation Error in test accepted_range_slv_municipios_populacao__1000 (models\silver\schema.yml)        
+  'test_accepted_range' is undefined. This can happen when calling a macro that does not exist. Check for typos and/or install package dependencies with "dbt deps".
+21:03:04
+21:03:04  Failure in test accepted_values_slv_estados_nivel_idh__Muito_Alto__Alto__Medio__Baixo (models\silver\schema.yml)
+21:03:04    Got 1 result, configured to fail if != 0
+21:03:04
+21:03:04    compiled code at target\compiled\medallion_dw\models\silver\schema.yml\accepted_values_slv_estados_a600a25fd60d8b00ca17973e2a1adb73.sql
+21:03:04
+21:03:04  Failure in test accepted_values_slv_municipios_porte_municipio__Metropole__Grande__Medio__Pequeno__Micro (models\silver\schema.yml)
+21:03:04    Got 2 results, configured to fail if != 0
+21:03:04
+21:03:04    compiled code at target\compiled\medallion_dw\models\silver\schema.yml\accepted_values_slv_municipios_f4bbcd84d0995da8f178e368aa7e19d2.sql
+21:03:04
+21:03:04  Done. PASS=46 WARN=0 ERROR=15 SKIP=0 TOTAL=61
+2026-03-04 18:03:05,516 [ERROR] dbt test falhou com codigo 1

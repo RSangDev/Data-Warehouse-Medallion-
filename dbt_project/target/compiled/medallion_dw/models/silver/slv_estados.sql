@@ -32,7 +32,7 @@ categorizado AS (
         CASE
             WHEN idh >= 0.800 THEN 'Muito Alto'
             WHEN idh >= 0.700 THEN 'Alto'
-            WHEN idh >= 0.555 THEN 'Médio'
+            WHEN idh >= 0.555 THEN 'Medio'
             ELSE 'Baixo'
         END AS nivel_idh,
 
