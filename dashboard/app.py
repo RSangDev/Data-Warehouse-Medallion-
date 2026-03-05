@@ -408,7 +408,7 @@ if page == "🏅 Gold Layer":
     for col, (accent, label, css_class, tbl, schema) in zip(
         [col1, col2, col3],
         [
-            ("#b07c47", "ibge_estados",    "badge-bronze", "main_bronze.ibge_estados",    "bronze"),
+            ("#b07c47", "ibge_estados",    "badge-bronze", "main_bronze.brz_ibge_estados", "bronze"),
             ("#8c99a6", "slv_internacoes", "badge-silver", "main_silver.slv_internacoes", "silver"),
             ("#c9973a", "gld_saude_por_uf","badge-gold",   "main_gold.gld_saude_por_uf",  "gold"),
         ],
@@ -457,7 +457,7 @@ if page == "🏅 Gold Layer":
                          color_continuous_scale=[[0,"#f5ede0"],[1,GOLD]])
         fig.update_traces(textinfo="label+percent entry", textfont_size=13)
         fig.update_layout(**{k:v for k,v in PL.items() if k != 'margin'}, height=340, coloraxis_showscale=False, margin=dict(t=10,b=10,l=10,r=10))
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
     with col_b:
         st.markdown('<div class="sec-title">IDH × PIB per Capita — UFs 2023</div>', unsafe_allow_html=True)
@@ -467,7 +467,7 @@ if page == "🏅 Gold Layer":
         fig2.update_traces(textposition="top center", textfont_size=9)
         fig2.update_layout(**PL, height=340, legend=dict(bgcolor="rgba(0,0,0,0)"))
         fig2.update_xaxes(tickformat=",.0f", tickprefix="R$ ")
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width='stretch')
 
     st.markdown('<div class="sec-title">Ranking de Performance em Saúde — 2023 (menor = melhor)</div>', unsafe_allow_html=True)
     rank = gold.sort_values("score_performance").reset_index(drop=True)
@@ -476,7 +476,7 @@ if page == "🏅 Gold Layer":
                   text="posicao", color_discrete_sequence=COLORS)
     fig3.update_traces(textposition="outside", textfont_size=9)
     fig3.update_layout(**PL, height=320, legend=dict(bgcolor="rgba(0,0,0,0)"))
-    st.plotly_chart(fig3, use_container_width=True)
+    st.plotly_chart(fig3, width='stretch')
 
 
 # ════════════════════════════════════════════════════════════════
@@ -507,7 +507,7 @@ elif page == "🗺️ Por UF":
             text=uf_ord["tx_internacao_1k_hab"].round(2), textposition="outside", textfont_size=9,
         ))
         fig.update_layout(**PL, height=300, yaxis_title="por 1k hab.")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
     with col_b:
         st.markdown('<div class="sec-title">% Internações por Urgência</div>', unsafe_allow_html=True)
@@ -520,7 +520,7 @@ elif page == "🗺️ Por UF":
             textposition="outside", textfont_size=9,
         ))
         fig2.update_layout(**PL, height=300, yaxis_title="%")
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width='stretch')
 
     st.markdown('<div class="sec-title">Evolução de Internações por Região (2019–2023)</div>', unsafe_allow_html=True)
     reg_ev = gold_all.groupby(["ano","regiao"])["total_internacoes"].sum().reset_index()
@@ -528,7 +528,7 @@ elif page == "🗺️ Por UF":
                    color_discrete_sequence=COLORS, markers=True)
     fig3.update_traces(line_width=2.5, marker_size=6)
     fig3.update_layout(**PL, height=320, legend=dict(bgcolor="rgba(0,0,0,0)"))
-    st.plotly_chart(fig3, use_container_width=True)
+    st.plotly_chart(fig3, width='stretch')
 
     st.markdown('<div class="sec-title">Tabela Completa — Gold Layer</div>', unsafe_allow_html=True)
     show = gold[["sigla_uf","nome_uf","regiao","nivel_idh","total_internacoes",
@@ -536,7 +536,7 @@ elif page == "🗺️ Por UF":
                  "tx_internacao_1k_hab","rank_eficiencia","score_performance"]].copy()
     show.columns = ["UF","Estado","Região","IDH","Internações","Óbito%",
                     "Dias Médios","Custo Médio","Int/1k hab","Rank Efic.","Score"]
-    st.dataframe(show, use_container_width=True, hide_index=True)
+    st.dataframe(show, width='stretch', hide_index=True)
 
 
 # ════════════════════════════════════════════════════════════════
@@ -562,7 +562,7 @@ elif page == "🦠 Diagnósticos":
                      color_continuous_scale=[[0,"#f5ede0"],[0.5,AMBER],[1,RUST]])
         fig.update_layout(**PL, height=340, yaxis_categoryorder="total ascending",
                           coloraxis_colorbar=dict(title="Óbito%", len=0.6))
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
     with col_b:
         st.markdown('<div class="sec-title">Custo vs. Dias Médios por CID</div>', unsafe_allow_html=True)
@@ -574,7 +574,7 @@ elif page == "🦠 Diagnósticos":
         fig2.update_traces(textposition="top center", textfont_size=9)
         fig2.update_layout(**PL, height=340)
         fig2.update_yaxes(tickformat=",.0f", tickprefix="R$ ")
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width='stretch')
 
     st.markdown('<div class="sec-title">Custo Total por Capítulo CID</div>', unsafe_allow_html=True)
     cap = query("""
@@ -586,7 +586,7 @@ elif page == "🦠 Diagnósticos":
                   color_continuous_scale=[[0,"#f5ede0"],[1,GOLD]])
     fig3.update_layout(**PL, height=300)
     fig3.update_yaxes(tickformat=",.0f", tickprefix="R$ ")
-    st.plotly_chart(fig3, use_container_width=True)
+    st.plotly_chart(fig3, width='stretch')
 
 
 # ════════════════════════════════════════════════════════════════
@@ -623,7 +623,7 @@ elif page == "📈 Temporal":
                 line=dict(color=cor, width=2.5)))
         fig.update_layout(**PL, height=320, legend=dict(bgcolor="rgba(0,0,0,0)", font_size=10))
         fig.update_xaxes(tickangle=-45, tickfont_size=9)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
     with col_b:
         st.markdown('<div class="sec-title">Taxa de Óbito Mensal (%)</div>', unsafe_allow_html=True)
@@ -632,7 +632,7 @@ elif page == "📈 Temporal":
         fig2.update_traces(line_width=2)
         fig2.update_layout(**PL, height=320, legend=dict(bgcolor="rgba(0,0,0,0)"))
         fig2.update_xaxes(tickangle=-45, tickfont_size=9)
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width='stretch')
 
     st.markdown('<div class="sec-title">Sazonalidade — Internações por Mês (média 2019–2023)</div>', unsafe_allow_html=True)
     saz = temp.groupby(["mes","regiao"])["total_internacoes"].mean().reset_index()
@@ -643,7 +643,7 @@ elif page == "📈 Temporal":
                    category_orders={"mes_nome": meses})
     fig3.update_traces(line_width=2.5, marker_size=6)
     fig3.update_layout(**PL, height=300, legend=dict(bgcolor="rgba(0,0,0,0)"))
-    st.plotly_chart(fig3, use_container_width=True)
+    st.plotly_chart(fig3, width='stretch')
 
 
 # ════════════════════════════════════════════════════════════════
@@ -691,7 +691,7 @@ elif page == "⚙️ Arquitetura":
                             "brz_datasus_internacoes + slv_estados",
                             "slv_estados + slv_internacoes","slv_internacoes","slv_internacoes"],
         "Testes":          ["2","2","4","6","4","6","5","4","3"],
-    }), use_container_width=True, hide_index=True)
+    }), width='stretch', hide_index=True)
 
     st.markdown('<div class="sec-title">Stack Técnico</div>', unsafe_allow_html=True)
     st.table(pd.DataFrame([

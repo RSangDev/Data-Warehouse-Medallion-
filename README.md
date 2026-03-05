@@ -1,194 +1,233 @@
 # 🏅 Data Warehouse Medallion
 
-> **dbt + DuckDB + Airflow + GitHub Actions**  
-> Arquitetura Bronze → Silver → Gold · IBGE + DATASUS · Portfólio de Engenharia de Dados
+**ELT moderno com dbt + DuckDB + Airflow + GitHub Actions**  
+Arquitetura Bronze → Silver → Gold · IBGE + DATASUS · Portfólio de Engenharia de Dados
 
 ---
 
-## 🎯 Narrativa do Projeto
+## Por que este projeto existe
 
-> *"Implementei um data warehouse com arquitetura medallion usando dbt para transformações, com testes de qualidade de dados automatizados, lineage documentado e orquestração via Airflow — 100% local e gratuito com DuckDB."*
+> dbt aparece em **70%+ das vagas de Engenharia de Dados** hoje. Este projeto demonstra domínio completo da stack moderna: não é um script ETL isolado, é um warehouse com arquitetura real, testes automatizados, lineage documentado e CI/CD que bloqueia deploys com dados ruins.
+
+**O que foi implementado:**
+
+- Arquitetura **medallion** (Bronze → Silver → Gold) com separação clara de responsabilidades
+- **61 testes de qualidade** de dados distribuídos em todas as camadas — `not_null`, `unique`, `accepted_values`, `accepted_range`
+- **Lineage** de modelos gerado automaticamente pelo dbt
+- **CI/CD** via GitHub Actions: o pipeline roda, testa e publica documentação a cada push
+- **100% local e gratuito** com DuckDB — sem custo de cloud, sem configuração de infraestrutura
 
 ---
 
-## 🏗️ Arquitetura
+## Arquitetura
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         FONTES DE DADOS                         │
-│   IBGE/SIDRA (estados + municípios)  ·  DATASUS/SIH (CID-10)  │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │ ingestion/
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  🟤 BRONZE  (DuckDB · schema bronze · views)                    │
-│  brz_ibge_estados · brz_ibge_municipios · brz_datasus_internac.│
-│  → Cast de tipos · colunas de auditoria · sem transformação     │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │ dbt run
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  ⚪ SILVER  (DuckDB · schema silver · tables)                   │
-│  slv_estados — IDH categorizado · quartil PIB · YoY             │
-│  slv_municipios — porte · densidade · join UF pai               │
-│  slv_internacoes — limpeza · custo/dia · categoria permanência  │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │ dbt run
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  🥇 GOLD  (DuckDB · schema gold · tables)                       │
-│  gld_saude_por_uf — KPIs + rankings + score performance         │
-│  gld_diagnosticos_resumo — CIDs ranqueados (volume/custo/mort.) │
-│  gld_evolucao_temporal — série mensal + MM3 + variação MoM      │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │
-                            ▼
-              Streamlit Dashboard (dashboard/app.py)
+┌─────────────────────────────────────────────────────────────┐
+│                      FONTES DE DADOS                        │
+│  IBGE/SIDRA · estados + municípios · 2019–2023             │
+│  DATASUS/SIH · internações hospitalares · CID-10           │
+└────────────────────────┬────────────────────────────────────┘
+                         │  Extract + Load
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  🟤 BRONZE  ·  schema main_bronze  ·  views                 │
+│                                                             │
+│  brz_ibge_estados                                           │
+│  brz_ibge_municipios          cast de tipos                 │
+│  brz_datasus_internacoes      colunas de auditoria          │
+│                               zero transformação            │
+└────────────────────────┬────────────────────────────────────┘
+                         │  dbt run
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  ⚪ SILVER  ·  schema main_silver  ·  tables                │
+│                                                             │
+│  slv_estados       IDH categorizado · quartil PIB · YoY    │
+│  slv_municipios    porte · densidade · join UF pai          │
+│  slv_internacoes   custo/dia · permanência · esfera         │
+└────────────────────────┬────────────────────────────────────┘
+                         │  dbt run
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  🥇 GOLD  ·  schema main_gold  ·  tables                    │
+│                                                             │
+│  gld_saude_por_uf          KPIs · rankings · score          │
+│  gld_diagnosticos_resumo   CIDs por volume/custo/mortalidade│
+│  gld_evolucao_temporal     série mensal · MM3 · MoM         │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         ▼
+            Streamlit Dashboard · gold layer
 ```
 
 ---
 
-## 🚀 Início Rápido
+## Stack
+
+| Componente | Tecnologia | Por que |
+|---|---|---|
+| **Warehouse** | DuckDB 0.10 | OLAP local de alta performance — troca por BigQuery mudando só o `profiles.yml` |
+| **Transformação** | dbt-duckdb 1.8 | SQL + Jinja2, lineage automático, testes declarativos |
+| **Qualidade** | dbt tests + dbt-utils | `not_null`, `unique`, `accepted_values`, `accepted_range` |
+| **Orquestração** | Apache Airflow 2.9 | DAGs com TaskGroups, retry, schedule diário às 03h |
+| **CI/CD** | GitHub Actions | dbt parse → compile → run → test → deploy docs |
+| **Ingestão** | Python + Pandas | IBGE API / DATASUS FTP — adaptável a Airbyte/Fivetran |
+| **Dashboard** | Streamlit + Plotly | Consome o gold layer via DuckDB read-only |
+| **Macros** | Jinja2 | `surrogate_key`, `classify_idh`, `audit_columns` reutilizáveis |
+
+---
+
+## Início rápido
 
 ```bash
-# 1. Instalar dependências
+# 1. Clone e crie o ambiente
+git clone https://github.com/RSangDev/dw-medallion
+cd dw-medallion
+python -m venv .venv && .venv\Scripts\activate   # Windows
 pip install -r requirements.txt
 
-# 2. Executar pipeline completo + dashboard
-python run.py
+# 2. Instale as dependências dbt
+cd dbt_project && dbt deps && cd ..
 
-# Opções adicionais
-python run.py --only-pipeline      # só pipeline
-python run.py --only-dashboard     # só dashboard
-python run.py --n 5000             # 5.000 internações
+# 3. Execute o pipeline completo
+python run.py --only-pipeline
+
+# 4. Abra o dashboard
+python run.py --only-dashboard
+```
+
+**Opções do runner:**
+
+```bash
+python run.py                    # pipeline + dashboard em sequência
+python run.py --only-pipeline    # só ETL + dbt
+python run.py --only-dashboard   # só dashboard (warehouse já construído)
+python run.py --n 5000           # pipeline com 5.000 internações
 ```
 
 ---
 
-## 🛠️ Stack Técnico
-
-| Componente | Tecnologia |
-|---|---|
-| **Warehouse** | DuckDB 0.10 (local) / BigQuery (cloud-ready) |
-| **Transformação** | dbt-duckdb 1.8 · SQL + Jinja2 |
-| **Camadas** | Bronze (views) → Silver (tables) → Gold (tables) |
-| **Qualidade** | dbt tests: `not_null`, `unique`, `accepted_values`, `accepted_range` |
-| **Orquestração** | Apache Airflow 2.9 · DAGs com TaskGroups |
-| **CI/CD** | GitHub Actions · dbt parse → compile → run → test → deploy docs |
-| **Dashboard** | Streamlit · Plotly · DuckDB read_only |
-| **Macros** | Jinja2 customizados: `surrogate_key`, `classify_idh`, `audit_columns` |
-
----
-
-## 📁 Estrutura do Projeto
+## Estrutura do projeto
 
 ```
 dw_medallion/
-├── run.py                          # Runner único (pipeline + dashboard)
+├── run.py                              # Entrada única do projeto
 ├── requirements.txt
 │
 ├── ingestion/
-│   ├── ingest.py                   # Extrai IBGE + DATASUS → data/raw/
-│   └── load_to_duckdb.py           # Carrega CSVs → bronze schema
+│   ├── ingest.py                       # Extract: IBGE + DATASUS → data/raw/
+│   └── load_to_duckdb.py               # Load: CSVs → schema bronze no DuckDB
 │
 ├── dbt_project/
-│   ├── dbt_project.yml             # Config principal + variáveis
-│   ├── profiles.yml                # Conexão DuckDB (dev/prod)
-│   ├── macros/utils.sql            # Macros Jinja2 reutilizáveis
+│   ├── dbt_project.yml                 # Config + variáveis (start_year, end_year)
+│   ├── profiles.yml                    # Conexão DuckDB dev/prod
+│   ├── packages.yml                    # dbt-utils 1.3
+│   ├── macros/utils.sql                # Macros Jinja2 reutilizáveis
 │   └── models/
 │       ├── bronze/
-│       │   ├── sources.yml         # Declaração das fontes + testes
+│       │   ├── sources.yml             # Fontes declaradas + testes bronze
 │       │   ├── brz_ibge_estados.sql
 │       │   ├── brz_ibge_municipios.sql
 │       │   └── brz_datasus_internacoes.sql
 │       ├── silver/
-│       │   ├── schema.yml          # Testes de qualidade
+│       │   ├── schema.yml              # 20 testes de qualidade
 │       │   ├── slv_estados.sql
 │       │   ├── slv_municipios.sql
 │       │   └── slv_internacoes.sql
 │       └── gold/
-│           ├── schema.yml
+│           ├── schema.yml              # 12 testes de qualidade
 │           ├── gld_saude_por_uf.sql
 │           ├── gld_diagnosticos_resumo.sql
 │           └── gld_evolucao_temporal.sql
 │
 ├── airflow/
-│   └── dags/medallion_pipeline.py  # DAG principal (ingest→bronze→dbt→test)
+│   └── dags/medallion_pipeline.py      # DAG: ingest → bronze → dbt run → test
 │
 ├── dashboard/
-│   └── app.py                      # Streamlit consumindo gold layer
+│   └── app.py                          # Streamlit 5 páginas · gold layer
 │
 ├── .github/
-│   └── workflows/dbt_ci.yml        # CI: lint → pipeline → test → deploy docs
+│   └── workflows/dbt_ci.yml            # CI: lint → pipeline → test → deploy docs
 │
 └── data/
-    ├── raw/                         # CSVs ingeridos
+    ├── raw/                             # CSVs extraídos
     └── warehouse/
-        └── medallion.duckdb        # DuckDB warehouse
+        └── medallion.duckdb            # DuckDB warehouse
 ```
 
 ---
 
-## 📊 Modelos dbt — Lineage
+## Modelos dbt e lineage
 
 ```
-source:bronze.ibge_estados
-    └── brz_ibge_estados
-            └── slv_estados
-                    ├── slv_municipios
-                    │       └── (referência)
-                    ├── slv_internacoes
-                    │       ├── gld_saude_por_uf ◄── slv_estados
-                    │       ├── gld_diagnosticos_resumo
-                    │       └── gld_evolucao_temporal
-                    └── gld_saude_por_uf
+source:bronze.ibge_estados ──► brz_ibge_estados ──► slv_estados ──┬──► gld_saude_por_uf
+                                                                   └──► slv_municipios
 
-source:bronze.datasus_internacoes
-    └── brz_datasus_internacoes
-            └── slv_internacoes (ver acima)
+source:bronze.datasus_internacoes ──► brz_datasus_internacoes ──► slv_internacoes ──┬──► gld_saude_por_uf
+                                                                                     ├──► gld_diagnosticos_resumo
+                                                                                     └──► gld_evolucao_temporal
 ```
 
 ---
 
-## ✅ Testes de Qualidade (dbt test)
+## Testes de qualidade
 
 | Camada | Modelo | Testes |
 |---|---|---|
 | Bronze | `sources.yml` | `not_null`, `unique` (id_aih), `accepted_values` (sexo, obito, UF) |
-| Silver | `slv_estados` | `accepted_range` (idh 0-1, pib > 5k, pop > 100k), `accepted_values` (nivel_idh) |
-| Silver | `slv_internacoes` | `unique` (id_aih), `accepted_range` (dias 1-365, valor > 0) |
-| Gold | `gld_saude_por_uf` | `accepted_range` (taxa_obito 0-100, score > 0) |
-| Gold | `gld_diagnosticos_resumo` | `accepted_range` (rank ≥ 1, taxa_obito 0-100) |
+| Silver | `slv_estados` | `accepted_range` idh ∈ [0,1], pib > 5k, pop > 100k · `accepted_values` nivel_idh |
+| Silver | `slv_internacoes` | `unique` id_aih · `accepted_range` dias ∈ [1,365], valor > 0, custo/dia > 0 |
+| Gold | `gld_saude_por_uf` | `accepted_range` taxa_obito ∈ [0,100], pct_urgencia ∈ [0,100], score > 0 |
+| Gold | `gld_diagnosticos_resumo` | `accepted_range` rank ≥ 1, taxa_obito ∈ [0,100] |
+| Gold | `gld_evolucao_temporal` | `accepted_range` mês ∈ [1,12] · `accepted_values` trimestre |
 
 ---
 
-## 🔄 Airflow DAG
+## Airflow DAG
 
 ```
-medallion_pipeline (schedule: 0 3 * * *)
+medallion_pipeline  ·  schedule: 0 3 * * *  (diário às 03h)
 │
 ├── [TaskGroup] ingestao
-│   ├── extrair_fontes        → IBGE + DATASUS → data/raw/
-│   ├── load_bronze_duckdb    → CSVs → bronze schema
-│   └── validar_bronze        → contagens mínimas
+│   ├── extrair_fontes          IBGE + DATASUS → data/raw/
+│   ├── load_bronze_duckdb      CSVs → schema bronze
+│   └── validar_bronze          contagens mínimas por tabela
 │
 ├── [TaskGroup] transformacao_dbt
-│   ├── dbt_run               → bronze → silver → gold
-│   ├── dbt_test              → qualidade de dados
-│   └── dbt_docs_generate     → lineage + catalog
+│   ├── dbt_run                 bronze → silver → gold
+│   ├── dbt_test                61 testes de qualidade
+│   └── dbt_docs_generate       lineage + catalog.json
 │
-└── validar_gold              → assertions no gold layer
+└── validar_gold                assertions no gold layer
 ```
 
 ---
 
-## 🔧 Extensões Sugeridas
+## CI/CD — GitHub Actions
 
-- Trocar DuckDB por **BigQuery** (mudar profile, zero código SQL)
-- Adicionar **dbt snapshots** para capturar mudanças históricas (SCD Type 2)
-- Incluir **dbt exposures** para documentar o dashboard como consumidor
-- **Great Expectations** para validações mais complexas
-- **dbt-osmosis** para propagação automática de descrições de colunas
-- Conectar ao **Metabase** ou **Superset** para BI em cima do gold layer
-#   D a t a - W a r e h o u s e - M e d a l l i o n -  
- 
+A cada push em `main` ou `develop` o workflow executa automaticamente:
+
+```
+dbt parse       valida sintaxe de todos os modelos
+     ↓
+dbt compile     gera SQL final sem executar
+     ↓
+python run.py --only-pipeline    pipeline completo no runner do CI
+     ↓
+dbt test        61 testes — falha bloqueia o merge
+     ↓
+dbt docs generate + deploy       publica lineage no GitHub Pages
+```
+
+---
+
+## Próximos passos
+
+| Extensão | Impacto |
+|---|---|
+| Trocar DuckDB por **BigQuery** | Zero mudança nos modelos SQL — só o `profiles.yml` |
+| **dbt snapshots** | Histórico de mudanças (SCD Type 2) em tabelas de dimensão |
+| **dbt exposures** | Documenta o dashboard como consumidor oficial do gold layer |
+| **Great Expectations** | Validações estatísticas além dos testes declarativos do dbt |
+| **Metabase / Superset** | BI em cima do gold layer sem escrever SQL |
+| **Airbyte** | Substituir a ingestão Python por conector gerenciado |
