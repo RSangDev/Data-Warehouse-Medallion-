@@ -16,7 +16,7 @@ on:
 env:
   DBT_DIR: ./dbt_project
   #DW_PATH: ./data/warehouse/medallion.duckdb
-  DW_PATH: data/warehouse/medallion.duckdb
+  DW_PATH: ${{ github.workspace }}/data/warehouse/medallion.duckdb
 
 jobs:
   # ─── Job 1: Lint e validação do projeto dbt ──────────────────
@@ -87,19 +87,19 @@ jobs:
       - name: dbt run (all models)
         working-directory: ${{ env.DBT_DIR }}
         env:
-          DW_PATH: "../data/warehouse/medallion.duckdb"
+          DW_PATH: ${{ github.workspace }}/data/warehouse/medallion.duckdb
         run: dbt run --profiles-dir . --project-dir . --full-refresh
 
       - name: dbt test (data quality)
         working-directory: ${{ env.DBT_DIR }}
         env:
-          DW_PATH: "../data/warehouse/medallion.duckdb"
+          DW_PATH: ${{ github.workspace }}/data/warehouse/medallion.duckdb
         run: dbt test --profiles-dir . --project-dir .
 
       - name: dbt docs generate
         working-directory: ${{ env.DBT_DIR }}
         env:
-          DW_PATH: "../data/warehouse/medallion.duckdb"
+          DW_PATH: ${{ github.workspace }}/data/warehouse/medallion.duckdb
         run: dbt docs generate --profiles-dir . --project-dir .
 
       - name: Upload dbt artifacts
