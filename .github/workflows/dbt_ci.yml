@@ -34,7 +34,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install dbt-duckdb==1.8.1 duckdb==0.10.3 pandas numpy
+          pip install dbt-duckdb==1.8.1 duckdb==1.4.4 pandas numpy
 
       - name: dbt parse (valida sintaxe dos modelos)
         working-directory: ${{ env.DBT_DIR }}
@@ -60,7 +60,7 @@ jobs:
           cache: pip
 
       - name: Install all dependencies
-        run: pip install dbt-duckdb==1.8.1 duckdb==0.10.3 pandas numpy requests
+        run: pip install dbt-duckdb==1.8.1 duckdb==1.4.4 pandas numpy requests
 
       - name: Create data directories
         run: mkdir -p data/raw data/warehouse
