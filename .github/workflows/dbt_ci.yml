@@ -15,7 +15,8 @@ on:
 
 env:
   DBT_DIR: ./dbt_project
-  DW_PATH: ./data/warehouse/medallion.duckdb
+  #DW_PATH: ./data/warehouse/medallion.duckdb
+  DW_PATH: data/warehouse/medallion.duckdb
 
 jobs:
   # ─── Job 1: Lint e validação do projeto dbt ──────────────────
@@ -35,6 +36,11 @@ jobs:
       - name: Install dependencies
         run: |
           pip install dbt-duckdb==1.8.1 duckdb==1.4.4 pandas numpy
+
+      - name: Debug files
+        run: |
+          echo "Listing data folder:"
+          ls -R data/
 
       - name: dbt parse (valida sintaxe dos modelos)
         working-directory: ${{ env.DBT_DIR }}
@@ -70,6 +76,13 @@ jobs:
 
       - name: Load bronze layer
         run: python ingestion/load_to_duckdb.py
+
+      - name: Verify DuckDB file
+        run: |
+          if [ ! -f data/warehouse/medallion.duckdb ]; then
+            echo "DuckDB file NOT found!"
+            exit 1
+          fi
 
       - name: dbt run (all models)
         working-directory: ${{ env.DBT_DIR }}

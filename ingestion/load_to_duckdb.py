@@ -14,7 +14,11 @@ logger = logging.getLogger(__name__)
 
 _ROOT  = os.path.dirname(os.path.dirname(__file__))
 RAW_DIR = os.path.join(_ROOT, "data", "raw")
-DB_PATH = os.path.join(_ROOT, "data", "warehouse", "medallion.duckdb")
+#DB_PATH = os.path.join(_ROOT, "data", "warehouse", "medallion.duckdb")
+DB_PATH = os.getenv(
+    "DW_PATH",
+    os.path.join(_ROOT, "data", "warehouse", "medallion.duckdb")
+)
 
 
 def load_raw_to_bronze(db_path: str = DB_PATH) -> None:
